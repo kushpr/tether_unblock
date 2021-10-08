@@ -1,12 +1,12 @@
 
-set_ttl_63()
+set_ttl_65()
 {
-	echo 63 > /proc/sys/net/ipv4/ip_default_ttl
+	echo 65 > /proc/sys/net/ipv4/ip_default_ttl
 }
 
-set_hl_63()
+set_hl_65()
 {
-	echo 63 > /proc/sys/net/ipv6/conf/all/hop_limit
+	echo 65 > /proc/sys/net/ipv6/conf/all/hop_limit
 }
 
 filter_interface_ipv4()
@@ -44,10 +44,25 @@ filter_ttl_63()
 
 		iptables -t filter -A $table -m ttl --ttl-lt 63 -j REJECT
 		iptables -t filter -A $table -m ttl --ttl-eq 63 -j RETURN
-		iptables -t filter -A $table -j CONNMARK --set-mark 64
+		iptables -t filter -A $table -j CONNMARK --set-mark 65
 
-		filter_interface_ipv4 $table 'rmnet_+'
-		filter_interface_ipv4 $table 'rev_rmnet_+'
+         	filter_interface_ipv4 $table 'ap0'
+                filter_interface_ipv4 $table 'dummy0'
+                filter_interface_ipv4 $table 'eth0'
+                filter_interface_ipv4 $table 'lo'
+                filter_interface_ipv4 $table 'p2p0'
+                filter_interface_ipv4 $table 'rndis0'
+                filter_interface_ipv4 $table 'rmnet0'
+                filter_interface_ipv4 $table 'rmnet1'
+                filter_interface_ipv4 $table 'rmnet_data0'
+                filter_interface_ipv4 $table 'rmnet_data1'
+                filter_interface_ipv4 $table 'rmnet_data2'
+                filter_interface_ipv4 $table 'rmnet_ipa0'
+                filter_interface_ipv4 $table 'rmnet_mhi0'
+                filter_interface_ipv4 $table 'rmnet_usb0'
+                filter_interface_ipv4 $table 'swlan0'
+                filter_interface_ipv4 $table 'tun0'
+                filter_interface_ipv4 $table 'usb0'
 
 		ip rule add fwmark 64 table 164
 		ip route add default dev lo table 164
@@ -66,10 +81,12 @@ filter_hl_63()
 
 		ip6tables -t filter -A $table -m hl --hl-lt 63 -j REJECT
 		ip6tables -t filter -A $table -m hl --hl-eq 63 -j RETURN
-		ip6tables -t filter -A $table -j CONNMARK --set-mark 64
+		ip6tables -t filter -A $table -j CONNMARK --set-mark 65
 
 		filter_interface_ipv6 $table 'rmnet_+'
 		filter_interface_ipv6 $table 'rev_rmnet_+'
+		filter_interface_ipv6 $table 'v4-rmnet_+'
+		filter_interface_ipv6 $table 'ipv6_vti_+'
 
 		ip rule add fwmark 64 table 164
 		ip route add default dev lo table 164
@@ -84,13 +101,14 @@ if [ -x "$(command -v iptables)" ]
 then
 	if grep -q TTL /proc/net/ip_tables_targets
 	then
-		iptables -t mangle -A POSTROUTING -j TTL --ttl-set 64
+	        iptables -t mangle -A PREROUTING -j TTL --ttl-set 65
+		iptables -t mangle -A POSTROUTING -j TTL --ttl-set 65
 	else
-		set_ttl_63
+		set_ttl_65
 		filter_ttl_63 sort_out_interface
 	fi
 else
-	set_ttl_63
+	set_ttl_65
 fi
 
 
@@ -98,12 +116,13 @@ if [ -x "$(command -v ip6tables)" ]
 then
 	if grep -q HL /proc/net/ip6_tables_targets
 	then
-		ip6tables -t mangle -A POSTROUTING -j HL --hl-set 64
+	        ip6tables -t mangle -A PREROUTING -j HL --hl-set 65
+		ip6tables -t mangle -A POSTROUTING -j HL --hl-set 65
 	else
-		set_hl_63
+		set_hl_65
 		filter_hl_63 sort_out_interface
 	fi
 else
-	set_hl_63
+	set_hl_65
 fi
 
